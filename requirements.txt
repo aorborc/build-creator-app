@@ -1,0 +1,22 @@
+Database:
+
+==> Admin user creates a question (record)
+==> for which SME need to create content on his/her PC and uploads a text (notepad / word doc) file. Once he/she uploads a file, 
+==> Designer need to download the script uploaded by SME and he should be able to upload the design
+
+
+Workflows:
+==> which should be notified to SME
+==> it shoud be notified to both Admin user and Designer. 
+==> And, upload field (button) should turn to green and text changes to "Submitted". 
+==> once he complete the design in his PC and button turns green color and text changes to "Submitted".
+
+
+
+Users:
+
+There are three people using the application: 
+
+Admin user + 
+SME User + 
+Designer. 

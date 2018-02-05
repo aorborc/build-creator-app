@@ -1,0 +1,345 @@
+/*
+ * Author       : aorborctechnologies
+ * Generated on : 05-Feb-2018 03:37:48 PST
+ * Version      : 3.0
+ */
+application "Design Workflow"
+{
+    date format = "dd-MMM-yyyy"
+    time zone = "IST"
+    section Create_Request
+    {
+        displayname = "Create Request"
+        form  Design_Request
+        {
+            displayname  =  "Design Request"
+            success message  =  "Data Added Successfully!"
+            field alignment = left
+            
+            must  have  Title
+            (
+                type  =  text
+                width  =  200px
+            )
+
+            Description
+            (
+                type = richtext
+                height  =  200px
+                width  =  506px
+                toolbar = enable
+                [
+                    style, font-color, background-color, alignment, link, table, bullets-and-numbering,
+                    font-size : {1, 2, 3, 4, 5, 6, 7},
+                    font-family : {"Serif", "Arial", "Courier New", "Georgia", "Tahoma", "Times New Roman", "Trebuchet", "Verdana", "Comic Sans Ms"}
+                ]
+            )
+
+            SME_Upload
+            (
+                displayname  =  "SME Upload"
+                type = upload file
+                browse = local_drive
+                width  =  300px
+                on update
+                {
+                    sendmail
+                    (
+                        To       :  input.Owner.Email + "," + input.Designer.Email 
+                        From     :  zoho.adminuserid 
+                        Subject  :  "SME File uploaded" 
+                        Message  :  "New file has been uploaded and attached herewith" 
+                        Attachments : file:input.SME_Upload
+                    )
+                    input.Status = "SME Submitted";
+                }
+            )
+
+            Designer_Upload
+            (
+                displayname  =  "Designer Upload"
+                type = upload file
+                browse = local_drive
+                width  =  300px
+                on update
+                {
+                    input.Status = "Designer Submitted";
+                }
+            )
+
+            must  have  Owner
+            (
+                type  =  picklist
+                values  =  Users.ID
+                displayformat = [ Name ]
+                sortorder  =  ascending
+                searchable  =  true
+                width  =  200px
+            )
+
+            must  have  SME
+            (
+                type  =  picklist
+                values  =  Users.ID
+                displayformat = [ Name ]
+                sortorder  =  ascending
+                searchable  =  true
+                width  =  200px
+            )
+
+            must  have  Designer
+            (
+                type  =  picklist
+                values  =  Users.ID
+                displayformat = [ Name ]
+                sortorder  =  ascending
+                searchable  =  true
+                width  =  200px
+            )
+
+            Status
+            (
+                type  =  picklist
+                values  =  {"Open",   "SME Submitted",   "Designer Submitted",   "Approved"}
+                initial value  =  "Open"
+                width  =  200px
+            )
+
+            actions
+            {
+                on add
+                {
+                    submit
+                    (
+                        type  =  submit
+                        displayname  =  "Submit"
+                        PreSubmit = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><preoncommit><openurl/><successmsg/><sendmail><include_field_values><![CDATA[true]]></include_field_values><language><![CDATA[English]]></language><enabled><![CDATA[true]]></enabled><subject><![CDATA[New Design Requested]]></subject><conttype><![CDATA[HTML]]></conttype><template_type><![CDATA[as_Inline]]></template_type><from><![CDATA[zoho.adminuserid]]></from><to><![CDATA[\"\"]]></to><message><![CDATA[&nbsp;]]></message></sendmail></preoncommit>"
+                        on success
+                        {
+                            sendmail
+                            (
+                                To       :  input.SME.Email 
+                                From     :  zoho.adminuserid 
+                                Subject  :  "New Design Requested" 
+                                Message  :  input.Description 
+                            )
+                        }
+                    )
+                    reset
+                    (
+                        type  =  reset
+                        displayname  =  "Reset"
+                    )
+                }
+                on edit
+                {
+                    update
+                    (
+                        type  =  submit
+                        displayname  =  "Update"
+                    )
+                    cancel
+                    (
+                        type  =  cancel
+                        displayname  =  "Cancel"
+                    )
+                }
+            }
+                    }
+
+        list  Design_Requests
+        {
+            displayname = "Design Requests"
+            show  all  rows  from  Design_Request 
+            (
+                Title
+                Description
+                SME_Upload as "SME Upload"
+                Designer_Upload as "Designer Upload"
+                Owner
+                SME
+                Designer
+                Status
+            )
+            options
+            (
+                menu alignment = left and right
+            )
+            conditional formatting
+            (
+                "Open"
+                {
+                    condition = (Status == "Open")
+                    fields = [Title, Description, SME_Upload, Designer_Upload, Owner, SME, Designer, Status]
+                    format = "font-weight:bold;color:#ffffff;background-color:#f0d41a;"
+                }
+                
+                "SME Submitted"
+                {
+                    condition = (Status == "SME Submitted")
+                    fields = [Title, Description, SME_Upload, Designer_Upload, Owner, SME, Designer, Status]
+                    format = "font-weight:bold;color:#ffffff;background-color:#291af0;"
+                }
+                
+                "Designer Submitted"
+                {
+                    condition = (Status == "Designer Submitted")
+                    fields = [Title, Description, SME_Upload, Designer_Upload, Owner, SME, Designer, Status]
+                    format = "font-weight:bold;color:#ffffff;background-color:#1af089;"
+                }
+                
+                "Approved"
+                {
+                    condition = (Status == "Approved")
+                    fields = [Title, Description, SME_Upload, Designer_Upload, Owner, SME, Designer, Status]
+                    format = "font-weight:bold;color:#ffffff;background-color:#26a61b;"
+                }
+            )
+        }
+
+    }
+
+    section Admin
+    {
+        form  Users
+        {
+            success message  =  "Data Added Successfully!"
+            field alignment = left
+            
+            must  have  Name
+            (
+                type  =  text
+                width  =  200px
+            )
+
+            must  have  Email
+            (
+                type  =  email
+                width  =  200px
+            )
+
+            actions
+            {
+                on add
+                {
+                    submit
+                    (
+                        type  =  submit
+                        displayname  =  "Submit"
+                    )
+                    reset
+                    (
+                        type  =  reset
+                        displayname  =  "Reset"
+                    )
+                }
+                on edit
+                {
+                    update
+                    (
+                        type  =  submit
+                        displayname  =  "Update"
+                    )
+                    cancel
+                    (
+                        type  =  cancel
+                        displayname  =  "Cancel"
+                    )
+                }
+            }
+                    }
+
+        list  Users_Report
+        {
+            displayname = "Users Report"
+            show  all  rows  from  Users 
+            (
+                Name
+                Email
+            )
+            options
+            (
+                menu alignment = left and right
+            )
+        }
+
+    }
+
+    customize
+    {
+        layout = "tab"
+        base theme = "professional"
+        color = "black"
+        new theme = 1
+        new theme color = 1
+    }
+    share_settings
+    {
+		"Administrator"
+		{
+			name = "Administrator"
+			type = Users_Permissions
+			permissions = {Chat:true, Predefined:true}
+
+		}
+		"User"
+		{
+			name = "User"
+			type = Users_Permissions
+			permissions = {Chat:false, Predefined:false}
+			description = "This profile only have add and view permission.\n"
+			ModulePermissions 
+			{
+				Design_Request
+				{
+					enabled = Tab,Create,View,Viewall,Search
+					FieldPermissions
+					{
+						Title{visibility:true,readonly:false}
+						Description{visibility:true,readonly:false}
+						SME_Upload{visibility:true,readonly:false}
+						Designer_Upload{visibility:true,readonly:false}
+						Owner{visibility:true,readonly:false}
+						SME{visibility:true,readonly:false}
+						Designer{visibility:true,readonly:false}
+						Status{visibility:true,readonly:false}
+					}
+				}
+				Users
+				{
+					FieldPermissions
+					{
+						Modified_User{visibility:false}
+						Modified_Time{visibility:false}
+						Modified_Location{visibility:false}
+						Added_Location{visibility:false}
+						Record_Status{visibility:false}
+						Modified_User_IP_Address{visibility:false}
+						Added_User_IP_Address{visibility:false}
+						Added_User{visibility:false}
+						ID{visibility:false}
+						Added_Time{visibility:false}
+						address_line_1{visibility:false}
+						address_line_2{visibility:false}
+						district_city{visibility:false}
+						state_province{visibility:false}
+						postal_Code{visibility:false}
+						country{visibility:false}
+						latitude{visibility:false}
+						longitude{visibility:false}
+						address_line_11{visibility:false}
+						address_line_21{visibility:false}
+						district_city1{visibility:false}
+						state_province1{visibility:false}
+						postal_Code1{visibility:false}
+						country1{visibility:false}
+						latitude1{visibility:false}
+						longitude1{visibility:false}
+						Name{visibility:false,readonly:false}
+						Email{visibility:false,readonly:false}
+					}
+				}
+			}
+		}
+    }
+}
